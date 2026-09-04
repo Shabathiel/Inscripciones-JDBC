@@ -1,6 +1,7 @@
 package edu.umg.programacion2.clase07.inscripciones.dao;
 
 import edu.umg.programacion2.clase07.inscripciones.modelo.Curso;
+
 import edu.umg.programacion2.clase07.inscripciones.modelo.Estudiante;
 
 import java.sql.Connection;
@@ -12,6 +13,10 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * TAREA: este es el DAO que tienes que construir. Resuelve la relacion
@@ -27,9 +32,31 @@ import java.util.Optional;
  */
 public class InscripcionDAO {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/prog2_db?useSSL=false&serverTimezone=UTC";
-    private static final String USUARIO = "root";
-    private static final String PASSWORD = "tu_password_aqui";
+	private static final Properties CONFIG= cargarConfiguracion();
+    
+    private static final String URL = CONFIG.getProperty("db.url");
+    private static final String USUARIO = CONFIG.getProperty("db.user");
+    private static final String PASSWORD = CONFIG.getProperty("db.password");
+    
+    private static Properties cargarConfiguracion() {
+        Properties propiedades = new Properties();
+
+        try (InputStream entrada = InscripcionDAO.class
+                .getClassLoader()
+                .getResourceAsStream("config.properties")) {
+
+            if (entrada == null) {
+                throw new RuntimeException("No se encontro config.properties");
+            }
+
+            propiedades.load(entrada);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error al cargar config.properties", e);
+        }
+
+        return propiedades;
+    }
 
     /**
      * Inscribe a un estudiante en un curso. Retorna el id generado.
@@ -96,6 +123,7 @@ public class InscripcionDAO {
     public List<Curso> listarCursosDeEstudiante(String carnet) throws SQLException {
         List<Curso> resultado = new ArrayList<>();
         // TODO: completar (ver pista del JOIN de 3 tablas arriba).
+        
 
         return resultado;
     }
