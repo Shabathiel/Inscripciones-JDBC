@@ -52,10 +52,30 @@ public class InscripcionDAO {
      *    vez de dejar que el error se propague sin explicacion.
      */
     public int inscribir(int estudianteId, int cursoId) throws SQLException {
-        // TODO: completar (ver pistas arriba). Recuerda el catch especifico
-        // para inscripciones duplicadas antes del catch general.
-        return -1;
-    }
+    	 String sql = "INSERT INTO inscripciones (estudiante_id, curso_id) VALUES (?, ?)";
+
+    	    try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
+    	         PreparedStatement ps = conexion.prepareStatement(
+    	                 sql,
+    	                 java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
+    	        ps.setInt(1, estudianteId);
+    	        ps.setInt(2, cursoId);
+
+    	        ps.executeUpdate();
+
+    	        try (ResultSet rs = ps.getGeneratedKeys()) {
+    	            if (rs.next()) {
+    	                return rs.getInt(1);
+    	            }
+    	        }
+
+    	    } catch (SQLIntegrityConstraintViolationException e) {
+    	        return -1;
+    	    }
+
+    	    return -1;
+    	}
 
     /**
      * Registra (o actualiza) la nota de un estudiante en un curso.
@@ -71,9 +91,20 @@ public class InscripcionDAO {
      *    EstudianteDAO.actualizarNombre en la Clase 5).
      */
     public boolean registrarNota(int estudianteId, int cursoId, double nota) throws SQLException {
-        // TODO: completar.
-        return false;
-    }
+    	 String sql = "UPDATE inscripciones SET nota = ? WHERE estudiante_id = ? AND curso_id = ?";
+
+    	    try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
+    	         PreparedStatement ps = conexion.prepareStatement(sql)) {
+
+    	        ps.setDouble(1, nota);
+    	        ps.setInt(2, estudianteId);
+    	        ps.setInt(3, cursoId);
+
+    	        int filasActualizadas = ps.executeUpdate();
+
+    	        return filasActualizadas > 0;
+    	    }
+    	}
 
     /**
      * Lista los cursos en los que esta inscrito un estudiante, dado su
